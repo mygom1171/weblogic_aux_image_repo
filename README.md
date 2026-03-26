@@ -1,2 +1,2 @@
-# k8s_test
-k8s_test
+# k8s_test - weblogic auxiliary image
+k8s_test - weblogic auxiliary image
