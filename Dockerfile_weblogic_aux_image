@@ -1,0 +1,67 @@
+########## BEGIN DOCKERFILE ##########
+#
+# Copyright (c) 2021, Oracle and/or its affiliates.
+#
+# Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+#
+# Create Auxiliary Image for WebLogic Kubernetes Operator
+
+FROM busybox AS os_update
+LABEL com.oracle.weblogic.imagetool.buildid="1b3a3c39-a2ff-43a6-8c6b-e1ecd573d038"
+
+USER root
+# Use package manager to make sure that unzip, tar, and other required packages are installed
+#
+# Copyright (c) 2021, Oracle and/or its affiliates.
+#
+# Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+#
+# Ensure necessary OS packages are installed
+
+
+# Create the Oracle user that will be the owner of the installed software
+#
+# Copyright (c) 2021, Oracle and/or its affiliates.
+#
+# Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+#
+# Create user and group
+RUN if [ -z "$(grep ^oracle: /etc/group)" ]; then addgroup oracle || exit 1 ; fi \
+ && if [ -z "$(grep ^oracle: /etc/group)" ]; then addgroup oracle || exit 1 ; fi \
+ && if [ -z "$(grep ^oracle: /etc/passwd)" ]; then adduser -D -G oracle oracle || exit 1 ; fi
+
+
+FROM os_update AS wdt_build
+
+RUN mkdir -p /auxiliary \
+ && mkdir -p /auxiliary/models \
+ && chown oracle:oracle /auxiliary
+
+    COPY --chown=oracle:oracle ["weblogic-deploy_4.4.2.zip", "/tmp/imagetool/"]
+
+    RUN test -d /auxiliary/weblogic-deploy && rm -rf /auxiliary/weblogic-deploy || echo Initial WDT install \
+        && unzip -q "/tmp/imagetool/weblogic-deploy_4.4.2.zip" -d /auxiliary
+
+FROM os_update AS final
+
+ENV AUXILIARY_IMAGE_PATH=/auxiliary \
+    WDT_HOME=/auxiliary \
+    WDT_MODEL_HOME=/auxiliary/models
+
+    RUN mkdir -p /auxiliary && chown oracle:oracle /auxiliary
+    COPY --from=wdt_build --chown=oracle:oracle /auxiliary /auxiliary/
+
+    RUN mkdir -p /auxiliary/models && chown oracle:oracle /auxiliary/models
+
+
+    COPY --chown=oracle:oracle ["archive.zip", "/auxiliary/models/"]
+
+
+  RUN chmod -R 640 /auxiliary/models/*
+
+USER oracle
+
+WORKDIR /auxiliary
+
+
+########## END DOCKERFILE ##########
