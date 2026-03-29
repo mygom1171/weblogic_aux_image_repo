@@ -15,7 +15,7 @@ import="java.net.InetAddress"%>
 <!DOCTYPE html>
 <html>
 <body>
-        <h1>WebLogic 예제 소스</font></h1><br>
+        <h1>WebLogic 예제 소스 - demo</font></h1><br>
 	<%
 		StringBuffer message = new StringBuffer();
 		message.append("<b>WebLogic Server Name:</b> " + System.getProperty("weblogic.Name"));
